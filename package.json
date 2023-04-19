@@ -1,0 +1,19 @@
+{
+  "name": "electronnfc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+      "start" : "electron ./main.js "
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "electron": "^24.1.2",
+    "nfc-pcsc": "^0.8.1"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^3.2.12"
+  }
+}
