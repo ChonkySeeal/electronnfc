@@ -1,5 +1,18 @@
 'use strict'
 const { app, BrowserWindow, webContents } = require('electron')
+const path = require('path')
+const { Client } = require("@notionhq/client")
+
+// Initializing a client
+var myHeaders = new Headers();
+myHeaders.append("Notion-Version", "2022-06-28");
+myHeaders.append("Content-Type", "application/json; charset=utf-8");
+myHeaders.append("Authorization", "Bearer secret_lj8NMQpObd8kZLp0eABz9O3vvr6XtLpzLqa37a0Xz1s");
+myHeaders.append("Cookie", "__cf_bm=.5J8KJt1PDqQ7gGr9f0sscLjW1rawW0moWnQVup4jq0-1682583429-0-Adp3Tyq6alDicV50bM2Oa8xaT8ZTepCpI6j/MS4S/XfbWv+aBuA3cPxXrbR70D8m4ie2Om3JKkjG/z52Dgy0jPY=");
+
+
+
+
 
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -15,9 +28,38 @@ nfc.on('reader', reader => {
     }
     console.log(`NFC (${reader.reader.name}): device attached`)
     reader.on('card', card => {
-        console.log(`NFC (${reader.reader.name}): card detected`, card.uid)
+        
         if (mainWindow) {
-            mainWindow.webContents.send('card', { message: `NFC (${reader.reader.name}): card detected`, card })
+            console.log(`NFC (${reader.reader.name}): card detected`, card.uid)
+            
+
+            var uuidValue = card.uid;
+
+
+            var raw = JSON.stringify({
+                "filter": {
+                    "property": "NFC",
+                    "title": {
+                        "equals": uuidValue
+                    }
+                }
+            });
+
+
+            var requestOptions = {
+                method: 'POST',
+                headers: myHeaders,
+                body: raw,
+                redirect: 'follow'
+            };
+
+            fetch("https://api.notion.com/v1/databases/c8627e1066374f04a23f4e780c0c5b1e/query", requestOptions)
+                .then(response => response.json())
+                .then(response => {
+                    mainWindow.webContents.send('scanned', response.results[0])
+                })
+                .then(result => console.log(result))
+                .catch(error => console.log('error', error));
         }
     })
     reader.on('error', err => {
@@ -40,14 +82,16 @@ function createWindow() {
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+        }
     })
 
-    // and load the index.html of the app.
+
+
     mainWindow.loadFile('index.html')
-
-    // Open the DevTools.
+    mainWindow.setMenu(null)
     mainWindow.webContents.openDevTools()
-
     // Emitted when the window is closed.
     mainWindow.on('closed', function () {
         // Dereference the window object, usually you would store windows
