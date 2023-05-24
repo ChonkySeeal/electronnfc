@@ -1,5 +1,5 @@
 "use strict";
-const { app, BrowserWindow, webContents } = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 const util = require("util");
 const { Client } = require("@notionhq/client");
@@ -24,36 +24,64 @@ nfc.on("reader", (reader) => {
       console.log(`NFC (${reader.reader.name}): card detected`, card.uid);
 
       var uuidValue = card.uid;
+      
 
       (async () => {
         const databaseId = "c8627e1066374f04a23f4e780c0c5b1e";
-        const response = await notion.databases.query({
+        await notion.databases.query({
           database_id: databaseId,
           filter: {
             property: "NFC",
             rich_text: {
-              contains: uuidValue,
+              equals: uuidValue,
             },
           },
-        });
-        console.log(
-          util.inspect(response, {
-            showHidden: false,
-            depth: null,
-            colors: true,
-          })
-        );
+        }).then(r => {
+        console.dir(r, {colors:true, depth:20})
         const propertiesData = {
-          title: response.results[0].properties["제목"].title[0].plain_text,
-          nfc: response.results[0].properties["NFC"].rich_text[0].plain_text,
+          title: r.results[0].properties["제목"].title[0].plain_text,
+          nfc: r.results[0].properties["NFC"].rich_text[0].plain_text,
           author:
-            response.results[0].properties["저자"].rich_text[0].plain_text,
-        };
+          r.results[0].properties["저자"].rich_text[0].plain_text,
+          status : r.results[0].properties["상태"].status.name,
+          person : r.results[0].properties["대출한 사람"]?.people[0]?.name
+        }
 
-        mainWindow.webContents.send("scanned", propertiesData);
-      })();
+        mainWindow.webContents.send("book", propertiesData);
+      })
+    
+        
+      })()
+      
+
+
     }
   });
+
+  ipcMain.on("buttonAction", (event, dto) => {
+    (async () => {
+      const databaseId = "84179885bbc8434e89441ec56313c014"; 
+      const response = await notion.databases.query({
+        database_id: databaseId,
+        filter: {
+          property: "NFC",
+          rich_text: {
+            contains: uuidValue,
+          },
+        },
+      }).then(r => {
+        
+      });
+
+
+  console.dir(notionData.results, { colors: true, depth: 20 });
+})();
+
+  });
+
+
+
+
   reader.on("error", (err) => {
     console.log(`NFC (${reader.reader.name}): an error occurred`, err);
   });
