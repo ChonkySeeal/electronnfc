@@ -3,7 +3,6 @@
 
 <head>
     <meta charset="UTF-8">
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <link rel="stylesheet" type="text/css" href="index.css">
     <link rel="stylesheet" type="text/css" href="wave.css">
     <link rel="stylesheet"
@@ -13,12 +12,24 @@
 
 <body>
     <div>
+        <div class="info">
+            <h2>책 정보</h2>
+            <h3 id="name">제목: </h3>
+            <h3 id="author" >지은이: </h3>
+            <h3 id="status" >대출 상태: </h3>
+            <h3 id="category">분야: </h3>
+            <h3 id="borrower">대출자: </h3>
 
-        <h2>책 정보</h2>
-        <h3 >제목: <p id="name"></p></h3>
-        <h3 >지은이: <p id="author"></p></h3>
-        <h3 >nfc값: <p id="nfc"></p></h3>
-
+        </div>
+        <div class="btnDiv">
+            <button id="borrow">대출</button>
+            <button id="cancle">취소</button>
+        </div>
+        <div class="scanInfo">
+            <h3>아이디를 스캔해 주세요</h3>
+        </div>
+        
+        
 
 
 
@@ -29,7 +40,7 @@
     
    
     <!-- You can also require other files to run in this process -->
-    <script src="./renderer.js"></script>
+    <script src="./renderer.js" type="text/javascript"  charset="utf-8"></script>
 </body>
 
 </html>

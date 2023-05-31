@@ -1,6 +1,13 @@
 
 
-animate__animated.animate__flipInX.init {
-    --animate-delay: 2s;
+.btnDiv {
+    display: none;
 }
 
+.scanInfo {
+    display: none;
+}
+
+#borrower {
+    display: none;
+}

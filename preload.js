@@ -1,7 +1,8 @@
-const { contextBridge, ipcRenderer } = require('electron')
+const { contextBridge, ipcRenderer } = require("electron");
 
-
-
-contextBridge.exposeInMainWorld('electronAPI', {
-    ScanCallBack: (callback) => ipcRenderer.on('scanned', callback)
-})
+contextBridge.exposeInMainWorld("electronAPI", {
+  readyForBook: (callback) => ipcRenderer.on("readyForBook", callback),
+  ScanBook: (callback) => ipcRenderer.on("book", callback),
+  ScanNameTag: (callback) => ipcRenderer.on("nametag", callback),
+  BorrowBook: (callback) => ipcRenderer.send("borrowBook", callback),
+});

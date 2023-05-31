@@ -1,8 +1,7 @@
-"use strict";
-const { app, BrowserWindow, webContents } = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
-const util = require("util");
 const { Client } = require("@notionhq/client");
+const { NFC } = require("nfc-pcsc");
 
 // Initializing a client
 const notion = new Client({
@@ -10,50 +9,51 @@ const notion = new Client({
 });
 
 let mainWindow;
-const { NFC } = require("nfc-pcsc");
+
 const nfc = new NFC();
+
 nfc.on("reader", (reader) => {
-  if (mainWindow) {
-    mainWindow.webContents.send("attach-device", {
-      message: `NFC (${reader.reader.name}): device attached`,
-    });
-  }
-  console.log(`NFC (${reader.reader.name}): device attached`);
   reader.on("card", (card) => {
-    if (mainWindow) {
-      console.log(`NFC (${reader.reader.name}): card detected`, card.uid);
+    console.log(`card detected`, card.uid);
+    var uuidValue = card.uid;
+    ipcMain.on("borrowBook", (event, dto) => {});
 
-      var uuidValue = card.uid;
-
-      (async () => {
-        const databaseId = "c8627e1066374f04a23f4e780c0c5b1e";
-        const response = await notion.databases.query({
+    const databaseId = "c8627e1066374f04a23f4e780c0c5b1e";
+    (async () => {
+      await notion.databases
+        .query({
           database_id: databaseId,
           filter: {
             property: "NFC",
             rich_text: {
-              contains: uuidValue,
+              equals: uuidValue,
             },
           },
+        })
+        .then((r) => {
+          if (r.results.length == 0) {
+            const databaseId = "84179885bbc8434e89441ec56313c014";
+            (async () => {
+              await notion.databases.query({
+                database_id: databaseId,
+                filter: {
+                  property: "NFC",
+                  rich_text: {
+                    equals: uuidValue,
+                  },
+                },
+              });
+            })();
+          } else {
+            mainWindow.webContents.send("book", r.results[0]);
+          }
+        })
+        .catch((e) => {
+          console.dir(e, { colors: true, depth: 20 });
         });
-        console.log(
-          util.inspect(response, {
-            showHidden: false,
-            depth: null,
-            colors: true,
-          })
-        );
-        const propertiesData = {
-          title: response.results[0].properties["제목"].title[0].plain_text,
-          nfc: response.results[0].properties["NFC"].rich_text[0].plain_text,
-          author:
-            response.results[0].properties["저자"].rich_text[0].plain_text,
-        };
-
-        mainWindow.webContents.send("scanned", propertiesData);
-      })();
-    }
+    })();
   });
+
   reader.on("error", (err) => {
     console.log(`NFC (${reader.reader.name}): an error occurred`, err);
   });
@@ -66,6 +66,7 @@ nfc.on("reader", (reader) => {
     }
   });
 });
+
 nfc.on("error", (err) => {
   console.log("NFC: an error occurred", err);
 });
