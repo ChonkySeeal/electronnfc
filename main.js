@@ -12,12 +12,15 @@ let mainWindow;
 
 const nfc = new NFC();
 
+ipcMain.on("borrowBook", (event, dto) => {
+  console.log(dto);
+});
+ipcMain.on("readyForBook", (event, dto) => {});
+
 nfc.on("reader", (reader) => {
   reader.on("card", (card) => {
-    console.log(`card detected`, card.uid);
     var uuidValue = card.uid;
-    ipcMain.on("borrowBook", (event, dto) => {});
-
+    console.log(`card detected`, card.uid);
     const databaseId = "c8627e1066374f04a23f4e780c0c5b1e";
     (async () => {
       await notion.databases
@@ -31,22 +34,7 @@ nfc.on("reader", (reader) => {
           },
         })
         .then((r) => {
-          if (r.results.length == 0) {
-            const databaseId = "84179885bbc8434e89441ec56313c014";
-            (async () => {
-              await notion.databases.query({
-                database_id: databaseId,
-                filter: {
-                  property: "NFC",
-                  rich_text: {
-                    equals: uuidValue,
-                  },
-                },
-              });
-            })();
-          } else {
-            mainWindow.webContents.send("book", r.results[0]);
-          }
+          mainWindow.webContents.send("book", r.results[0]);
         })
         .catch((e) => {
           console.dir(e, { colors: true, depth: 20 });
