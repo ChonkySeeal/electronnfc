@@ -35,6 +35,7 @@ nfc.on("reader", (reader) => {
             property: "NFC",
             rich_text: {
               equals: uuidValue,
+              equals: uuidValue,
             },
           },
         })
