@@ -12,40 +12,67 @@ let mainWindow;
 
 const nfc = new NFC();
 
-let nfcDto=100 ;
+const nfcDto = {nfc : "", condition : ""};
 
-ipcMain.on("borrowBook", (event, dto) => {
-  console.log(nfcDto)
-  nfcDto = 200;
-  console.log(nfcDto)
+ipcMain.on("borrowBtn", (event, dto) => {
+  nfcDto.condition= "book";
+  
 });
 
-ipcMain.on("readyForBook", (event, dto) => {});
+ipcMain.on("requestNfc", (event, dto) => {
+  console.log("am i here?????????")
+  nfcDto.condition= "person";
+  
+});
+
+
 
 nfc.on("reader", (reader) => {
   reader.on("card", (card) => {
-    var uuidValue = card.uid;
-    console.log(`card detected`, card.uid);
-    const databaseId = "c8627e1066374f04a23f4e780c0c5b1e";
-    (async () => {
-      await notion.databases
-        .query({
-          database_id: databaseId,
-          filter: {
-            property: "NFC",
-            rich_text: {
-              equals: uuidValue,
-              equals: uuidValue,
+    nfcDto.nfc = card.uid;
+     if(nfcDto.condition=="book") {
+      const databaseId = "c8627e1066374f04a23f4e780c0c5b1e";
+      (async () => {
+        await notion.databases
+          .query({
+            database_id: databaseId,
+            filter: {
+              property: "NFC",
+              rich_text: {
+                equals: nfcDto.nfc,
+              },
             },
-          },
-        })
-        .then((r) => {
-          mainWindow.webContents.send("book", r.results[0]);
-        })
-        .catch((e) => {
-          console.dir(e, { colors: true, depth: 20 });
-        });
-    })();
+          })
+          .then((r) => {
+            mainWindow.webContents.send("scannedBook", r.results[0].properties);
+          })
+          .catch((e) => {
+            console.dir(e, { colors: true, depth: 20 });
+          });
+      })();
+     }
+     if(nfcDto.condition=="person") {
+      const databaseId = "84179885bbc8434e89441ec56313c014";
+      (async () => {
+        await notion.databases
+          .query({
+            database_id: databaseId,
+            filter: {
+              property: "NFC",
+              rich_text: {
+                equals: nfcDto.nfc,
+              },
+            },
+          })
+          .then((r) => {
+            mainWindow.webContents.send("scannedPerson", r.results[0].properties);
+          })
+          .catch((e) => {
+            console.dir(e, { colors: true, depth: 20 });
+          });
+      })();
+     }
+    
   });
 
   reader.on("error", (err) => {
