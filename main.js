@@ -12,9 +12,14 @@ let mainWindow;
 
 const nfc = new NFC();
 
+let nfcDto=100 ;
+
 ipcMain.on("borrowBook", (event, dto) => {
-  console.log(dto);
+  console.log(nfcDto)
+  nfcDto = 200;
+  console.log(nfcDto)
 });
+
 ipcMain.on("readyForBook", (event, dto) => {});
 
 nfc.on("reader", (reader) => {

@@ -34,8 +34,16 @@ electronAPI.ScanBook((event, dto) => {
       ? dto.properties["대출한 사람"].people.name
       : "대출한 사람 이름이 기입 되지 않음";
   }
+
+
+
   setTimeout(resetForm, 60000);
+  electronAPI.waitForBorrowBookRequest((event, dto) => {
+
+  })
 });
+
+electronAPI.borrowBook();
 
 function resetForm() {
   document.getElementById("category").innerHTML = "분야: ";
