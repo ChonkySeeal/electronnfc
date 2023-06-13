@@ -1,15 +1,18 @@
+let pageId;
 
-
-document.getElementById("borrow").addEventListener("click", electronAPI.borrowBtn)
+document
+  .getElementById("borrow")
+  .addEventListener("click", electronAPI.borrowBtn);
 
 electronAPI.scannedBook(function (event, dto) {
-  console.dir(dto, {colors: true, depth : 20})
+  console.dir(dto, { colors: true, depth: 20 });
+  pageId = dto.id;
   electronAPI.requestNfc();
-})
+});
 
-electronAPI.scannedPerson(function (event, dto)  {
-  console.dir(dto, {colors: true, depth : 20})
-})
+electronAPI.scannedPerson(function (event, dto) {
+  console.dir(dto, { colors: true, depth: 20 });
+});
 
 function resetForm() {
   document.getElementById("category").innerHTML = "분야: ";
