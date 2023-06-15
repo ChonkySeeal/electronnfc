@@ -1,13 +1,66 @@
+#borrow{
+  background-color: aquamarine;
+}
 
+#cancle{
+    background-color: aqua;
+}
+
+#return{
+    background-color: chocolate;
+}
+
+.info {
+    margin-bottom: 20px;
+}
 
 .btnDiv {
-    display: none;
+    display: inline; 
+    margin:auto;
+    text-align: center;
+}
+
+.btnDiv button {
+    margin: 0 5px;
+    margin:auto;
+    display:block;
 }
 
 .scanInfo {
     display: none;
 }
 
-#borrower {
-    display: none;
+#img{
+    text-align:center;
+}
+
+ /* 테이블 스타일 */
+ table {
+    margin-top: 30px;
+    border-collapse: collapse; /* 테이블 셀 경계를 병합 */
+    width: 100%; /* 테이블 폭을 100%로 설정 */
+}
+
+/* 테이블 셀 스타일 */
+th, td {
+    padding: 5px;
+    border: 1px solid black; /* 테이블 셀 경계 스타일 설정 */
+    padding: 8px; /* 셀 안의 여백 설정 */
+    text-align: left; /* 텍스트 정렬 */
+}
+
+/* 짝수 행 배경색 설정 */
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* 마우스 호버 효과 */
+tr:hover {
+    background-color: #ddd;
+}
+
+/* 테이블 헤더 스타일 */
+th {
+    background-color: #4CAF50; /* 배경색 설정 */
+    color: white; /* 텍스트 색상 설정 */
 }
