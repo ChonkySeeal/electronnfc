@@ -1,2 +1,18 @@
 
 
+.info {
+    display: none;
+}
+
+.btnDiv {
+    margin: auto;
+}
+
+.direction {
+    display: none;
+}
+
+#spinner {
+    display: none;
+}
+

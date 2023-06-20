@@ -1,9 +1,9 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("electronAPI", {
-  borrowBtn: (callback) => ipcRenderer.send("borrowBtn", callback),
-  nfcScanned: (callback) => ipcRenderer.on("nfcScanned", callback),
+  borrow: (callback) => ipcRenderer.send("borrow", callback),
   scannedBook: (callback) => ipcRenderer.on("scannedBook", callback),
-  scannedPerson: (callback) => ipcRenderer.on("scannedPerson", callback),
-  requestNfc: (callback) => ipcRenderer.send("requestNfc", callback),
+  borrower: (callback) => ipcRenderer.send("borrower", callback),
+  return: (callback) => ipcRenderer.send("return", callback),
+  loading: (callback) => ipcRenderer.on("loading", callback),
 });

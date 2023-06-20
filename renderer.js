@@ -1,19 +1,10 @@
-let pageId;
-
-document
-  .getElementById("borrow")
-  .addEventListener("click", electronAPI.borrowBtn);
+document.getElementById("borrow").addEventListener("click", electronAPI.borrow);
+document.getElementById("return").addEventListener("click", electronAPI.return);
 
 electronAPI.scannedBook(function (event, dto) {
-  console.dir(dto, { colors: true, depth: 20 });
-  pageId = dto.id;
-  electronAPI.requestNfc();
+  electronAPI.borrower();
 });
-
-electronAPI.scannedPerson(function (event, dto) {
-  console.dir(dto, { colors: true, depth: 20 });
-});
-
+electronAPI.loading(loading);
 function resetForm() {
   document.getElementById("category").innerHTML = "분야: ";
   document.getElementById("status").innerHTML = "대출 상태: ";
@@ -21,4 +12,8 @@ function resetForm() {
   document.getElementById("author").innerHTML = "지은이: ";
   document.getElementsByClassName("btnDiv")[0].style.display = "none";
   document.getElementsByClassName("scanInfo")[0].style.display = "none";
+}
+
+function loading() {
+  document.getElementById("spinner").style.display = "block";
 }
