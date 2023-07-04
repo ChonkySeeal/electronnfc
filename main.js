@@ -3,7 +3,13 @@ const path = require("path");
 const { Client } = require("@notionhq/client");
 const { NFC } = require("nfc-pcsc");
 
-// Initializing a client
+// const notion = new Client({
+//   auth: "secret_3ovPS05h7kYw14G5n9P7yKum6wvc4h7nc2LtVpnS2Gv",
+// });
+
+// const personDb = "4e9dae70b5f64f11ac02cb8186e62bbd";
+// const bookDb = "7706d45e1e6449fc86baf828633231c6";
+
 const notion = new Client({
   auth: "secret_3ovPS05h7kYw14G5n9P7yKum6wvc4h7nc2LtVpnS2Gv",
 });
@@ -18,27 +24,55 @@ const nfcObj = { nfc: "", condition: "" };
 
 const bookObj = { id: "", result: {} };
 
+let timerId;
+
 let personId;
 
+function resetEverything() {
+  bookObj.id = "";
+  bookObj.result = {};
+  personId = "";
+  timerId = "";
+  nfcObj.nfc = "";
+  nfcObj.condition = "";
+}
+
+function resetUI() {
+  timerId = setTimeout(() => {
+    mainWindow.webContents.send("reset");
+    resetEverything();
+  }, 20000);
+}
+
+function cancelResetEverything() {
+  clearTimeout(timerId);
+}
+
 ipcMain.on("borrow", (event, dto) => {
-  console.log(event);
-  console.log(dto);
   nfcObj.condition = "borrow";
+  resetUI();
 });
 
 ipcMain.on("borrower", (event, dto) => {
   nfcObj.condition = "borrower";
+  if (timerId != "") cancelResetEverything();
+  resetUI();
 });
 
 ipcMain.on("return", (event, dto) => {
   nfcObj.condition = "return";
+  resetUI();
+});
+
+ipcMain.on("cancel", (event, dto) => {
+  mainWindow.webContents.send("reset");
+  resetEverything();
 });
 
 nfc.on("reader", (reader) => {
   reader.on("card", (card) => {
     nfcObj.nfc = card.uid;
     if (nfcObj.condition == "borrow") {
-      mainWindow.webContents.send("loading");
       (async () => {
         await notion.databases
           .query({
@@ -52,8 +86,15 @@ nfc.on("reader", (reader) => {
           })
           .then((r) => {
             bookObj.id = r.results[0].id;
-            bookObj.result = r.results[0].properties;
+            bookObj.result = {
+              title: r.results[0].properties["이름"].title[0].plain_text,
+              author: r.results[0].properties["저자"].rich_text[0].plain_text,
+              category: r.results[0].properties["분야"].multi_select[0].name,
+              shelfNum: r.results[0].properties["책장 번호"].number,
+            };
+
             mainWindow.webContents.send("scannedBook", bookObj);
+            nfcObj.condition = "";
           })
           .catch((e) => {
             console.dir(e, { colors: true, depth: 20 });
@@ -74,7 +115,12 @@ nfc.on("reader", (reader) => {
           })
           .then((r) => {
             personId = r.results[0].properties["Person"].people[0].id;
+            pesonName = r.results[0].properties["Person"].people[0].name;
+            if (personId == "") {
+              return;
+            }
             (async () => {
+              cancelResetEverything();
               await notion.pages
                 .update({
                   page_id: bookObj.id,
@@ -96,11 +142,11 @@ nfc.on("reader", (reader) => {
                   },
                 })
                 .then((r) => {
-                  bookObj.id = "";
-                  bookObj.result = {};
-                  personId = "";
-                  nfcObj.nfc = "";
-                  nfcObj.condition = "";
+                  mainWindow.webContents.send("done", {
+                    name: pesonName,
+                    ...bookObj,
+                  });
+                  resetEverything();
                 })
                 .catch((e) => {
                   console.dir(e, { colors: true, depth: 20 });
@@ -127,7 +173,12 @@ nfc.on("reader", (reader) => {
           })
           .then(async (r) => {
             bookObj.id = r.results[0].id;
-            bookObj.result = r.results[0].properties;
+            bookObj.result = {
+              title: r.results[0].properties["이름"].title[0].plain_text,
+              author: r.results[0].properties["저자"].rich_text[0].plain_text,
+              category: r.results[0].properties["분야"].multi_select[0].name,
+              shelfNum: r.results[0].properties["책장 번호"].number,
+            };
             await notion.pages
               .update({
                 page_id: bookObj.id,
@@ -144,11 +195,8 @@ nfc.on("reader", (reader) => {
                 },
               })
               .then((r) => {
-                bookObj.id = "";
-                bookObj.result = {};
-                personId = "";
-                nfcObj.nfc = "";
-                nfcObj.condition = "";
+                mainWindow.webContents.send("return", bookObj);
+                resetEverything();
               })
               .catch((e) => {
                 console.dir(e, { colors: true, depth: 20 });

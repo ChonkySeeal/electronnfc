@@ -5,5 +5,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   scannedBook: (callback) => ipcRenderer.on("scannedBook", callback),
   borrower: (callback) => ipcRenderer.send("borrower", callback),
   return: (callback) => ipcRenderer.send("return", callback),
-  loading: (callback) => ipcRenderer.on("loading", callback),
+  returnOn: (callback) => ipcRenderer.on("return", callback),
+  reset: (callback) => ipcRenderer.on("reset", callback),
+  done: (callback) => ipcRenderer.on("done", callback),
+  cancel: (callback) => ipcRenderer.send("cancel", callback),
 });
